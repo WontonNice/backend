@@ -9,6 +9,3 @@ export const pool = new Pool({
     rejectUnauthorized: false // required for Render/PostgreSQL
   }
 });
-
-
-//test
