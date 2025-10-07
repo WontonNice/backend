@@ -13,7 +13,6 @@ app.use(express.json());
 // ✅ all routes
 app.use('/api', attendanceRoutes);
 app.use('/api/teacher', teacherRoutes);
-app.use('/api/attendance', attendanceRoutes);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
