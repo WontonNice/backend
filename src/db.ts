@@ -9,8 +9,9 @@ if (!connectionString) {
 
 export const pool = new Pool({
   connectionString,
-  ssl: { rejectUnauthorized: false }, // required for Supabase/hosted Postgres
-  max: 5,                             // keep pool small on free tiers
+  ssl: { rejectUnauthorized: false }, // Supabase/hosted PG
+  max: 5,
   idleTimeoutMillis: 30_000,
   keepAlive: true,
+  connectionTimeoutMillis: 5000,      // 👈 fail fast instead of hanging
 });
