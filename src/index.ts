@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auth";
 
+import { pool } from "./db";
+
 const app = express();
 app.use(express.json());
 
@@ -10,7 +12,11 @@ app.use(cors({
   credentials: true
 }));
 
-import { pool } from "./db";
+app.post("/api/auth/echo", (req, res) => {
+  res.json({ got: req.body ?? null, v: "A2" });
+});
+
+//import { pool } from "./db";
 
 app.get("/api/auth/health", (_req, res) => res.json({ ok: true }));
 
