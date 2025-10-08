@@ -25,12 +25,11 @@ router.post("/register", async (req, res) => {
     return res.status(409).json({ error: "Username already taken" });
   }
   console.error("REGISTER_ERROR:", err);
-  return res.status(500).json({
-    error: "Server error",
-    code: err?.code,
-    message: err?.message
-  });
+  return res
+    .status(500)
+    .json({ error: "Server error", code: err?.code, message: err?.message });
 }
+
 });
 
 export default router;
