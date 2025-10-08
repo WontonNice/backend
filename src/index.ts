@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://frontend-tgl3.onrender.com"],
+  origin: ["http://localhost:5173", "https://backend-3wuq.onrender.com"],
   credentials: true,
 }));
 
