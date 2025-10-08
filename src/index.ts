@@ -10,9 +10,10 @@ app.use(cors({
   credentials: true
 }));
 
+import { pool } from "./db";
+
 app.get("/api/auth/health", (_req, res) => res.json({ ok: true }));
 
-import { pool } from "./db";
 app.get("/api/auth/db", async (_req, res) => {
   try { await pool.query("SELECT 1"); res.json({ db: "ok" }); }
   catch (e:any) { res.status(500).json({ db: "fail", code: e.code, message: e.message }); }
