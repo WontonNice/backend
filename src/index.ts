@@ -21,14 +21,25 @@ app.get("/api/auth/db", async (_req, res) => {
   try { await pool.query("SELECT 1"); res.json({ db: "ok", v: "A3" }); }
   catch (e:any) { res.status(500).json({ db: "fail", code: e.code, message: e.message, v: "A3" }); }
 });
-app.get("/api/auth/users-latest", async (_req, res) => {
+app.get("/api/auth/db", async (_req, res) => {
   try {
-    const { rows } = await pool.query(`SELECT id, username, created_at FROM users ORDER BY id DESC LIMIT 5`);
-    res.json({ users: rows });
-  } catch (e:any) {
-    res.status(500).json({ error: "select fail", code: e.code, message: e.message });
+    const r = await pool.query("SELECT current_database() AS db, version() AS version");
+    res
+      .type("application/json")
+      .status(200)
+      .send(JSON.stringify({ ok: true, info: r.rows[0] }));
+  } catch (e: any) {
+    console.error("DB_PROBE_ERROR:", e);
+    const code = e?.code ?? "";
+    const msg = e?.message ?? "";
+    // send plain text so browsers don't hide it
+    res
+      .type("text/plain")
+      .status(500)
+      .send(`DB_FAIL code=${code} message=${msg}`);
   }
 });
+
 
 // Mount routes
 app.use("/api/auth", authRouter);
