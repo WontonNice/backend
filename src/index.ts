@@ -4,6 +4,8 @@ import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auth";
 import { pool } from "./db";
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 

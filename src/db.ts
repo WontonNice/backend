@@ -1,6 +1,5 @@
 // src/db.ts
 import { Pool } from "pg";
-import dns from "dns";
 import "dotenv/config";
 
 const connectionString = process.env.DATABASE_URL;
@@ -10,10 +9,8 @@ if (!connectionString) {
 
 export const pool = new Pool({
   connectionString,
-  ssl: { rejectUnauthorized: false },
-  max: 5,
+  ssl: { rejectUnauthorized: false }, // required for Supabase/hosted Postgres
+  max: 5,                             // keep pool small on free tiers
   idleTimeoutMillis: 30_000,
   keepAlive: true,
-  // 👇 Force IPv4 so we don’t try IPv6 (avoids ENETUNREACH)
-  lookup: (hostname, _opts, cb) => dns.lookup(hostname, { family: 4, all: false }, cb),
 });
