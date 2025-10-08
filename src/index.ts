@@ -1,17 +1,15 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import attendanceRoutes from './routes/attendance';
+import express from "express";
+import cors from "cors";
+import { pool } from "./db";
 
-dotenv.config();
 const app = express();
-
-app.use(cors());
 app.use(express.json());
+app.use(cors({ origin: ["http://localhost:5173", "https://frontend-tgl3.onrender.com"] }));
 
-app.use('/api', attendanceRoutes);
-
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.get("/health", async (_req, res) => {
+  try { await pool.query("SELECT 1"); res.send("ok"); }
+  catch { res.status(500).send("db error"); }
 });
+
+const PORT = Number(process.env.PORT || 3000);
+app.listen(PORT, () => console.log(`Server on ${PORT}`));
