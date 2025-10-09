@@ -1,14 +1,19 @@
-// ❗ WARNING: This stores plain-text passwords. For testing only.
+// src/auth.ts
 import { Router } from "express";
-import { pool } from "../db";
+import { createClient } from "@supabase/supabase-js";
 
 const router = Router();
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Service key required for inserts
+);
 
 function isValidUsername(u: unknown): u is string {
   return typeof u === "string" && /^[a-zA-Z0-9_]{3,32}$/.test(u);
 }
 function isValidPassword(p: unknown): p is string {
-  return typeof p === "string" && p.length >= 1 && p.length <= 128; // allow short for quick tests
+  return typeof p === "string" && p.length >= 1 && p.length <= 128;
 }
 
 /**
@@ -19,22 +24,29 @@ function isValidPassword(p: unknown): p is string {
 router.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body ?? {};
-    if (!isValidUsername(username)) return res.status(400).json({ error: "Invalid username" });
-    if (!isValidPassword(password)) return res.status(400).json({ error: "Invalid password" });
+    if (!isValidUsername(username))
+      return res.status(400).json({ error: "Invalid username" });
+    if (!isValidPassword(password))
+      return res.status(400).json({ error: "Invalid password" });
 
-    // Store password AS-IS (in password_hash column) — not secure; testing only.
-    const { rows } = await pool.query(
-      `INSERT INTO users (username, password_hash)
-       VALUES ($1, $2)
-       RETURNING id, username, created_at`,
-      [username, password]
-    );
+    // Insert directly into 'users' table (plain-text password for testing)
+    const { data, error } = await supabase
+      .from("users")
+      .insert([{ username, password_hash: password }])
+      .select("id, username, created_at")
+      .single();
 
-    return res.status(201).json({ user: rows[0] });
+    if (error) {
+      if (error.message.includes("duplicate key"))
+        return res.status(409).json({ error: "Username already taken" });
+      console.error("REGISTER_ERROR:", error);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    return res.status(201).json({ user: data });
   } catch (err: any) {
-    if (err?.code === "23505") return res.status(409).json({ error: "Username already taken" });
     console.error("REGISTER_ERROR:", err);
-    return res.status(500).json({ error: "Server error", code: err?.code, message: err?.message });
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
