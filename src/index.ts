@@ -1,28 +1,32 @@
 // src/index.ts
 import "dotenv/config";
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first"); // prefer IPv4 to avoid ENETUNREACH
+
 import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auth";
 import { pool } from "./db";
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 
 app.use(express.json());
 
-app.use(cors({
-  origin: ["http://localhost:5173", "https://frontend-tgl3.onrender.com"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://frontend-tgl3.onrender.com"],
+    credentials: true,
+  })
+);
 
 // Health & debug
 app.get("/healthz", (_req, res) => res.send("ok"));
-app.post("/api/auth/echo", (req, res) => res.json({ got: req.body ?? null, v: "A2" }));
-app.get("/api/auth/db", async (_req, res) => {
-  try { await pool.query("SELECT 1"); res.json({ db: "ok", v: "A3" }); }
-  catch (e:any) { res.status(500).json({ db: "fail", code: e.code, message: e.message, v: "A3" }); }
+
+app.post("/api/auth/echo", (req, res) => {
+  res.json({ got: req.body ?? null, v: "A2" });
 });
+
+// Single DB probe (kept)
 app.get("/api/auth/db", async (_req, res) => {
   try {
     const r = await pool.query("SELECT current_database() AS db, version() AS version");
@@ -34,14 +38,10 @@ app.get("/api/auth/db", async (_req, res) => {
     console.error("DB_PROBE_ERROR:", e);
     const code = e?.code ?? "";
     const msg = e?.message ?? "";
-    // send plain text so browsers don't hide it
-    res
-      .type("text/plain")
-      .status(500)
-      .send(`DB_FAIL code=${code} message=${msg}`);
+    // plain text so browsers don't hide details
+    res.type("text/plain").status(500).send(`DB_FAIL code=${code} message=${msg}`);
   }
 });
-
 
 // Mount routes
 app.use("/api/auth", authRouter);
