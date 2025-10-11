@@ -29,10 +29,10 @@ app.use("/api/auth", authRouter);
 // Serve frontend build for all non-API routes
 import path from "path";
 
-app.use(express.static(path.join(__dirname, "../dist"))); // adjust if your frontend build path is different
+app.use(express.static(path.join(__dirname, "../frontend"))); // adjust if your frontend build path is different
 
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
+  res.sendFile(path.join(__dirname, "../frontend", "index.html"));
 });
 
 // ✅ Start server
