@@ -29,5 +29,5 @@ app.get("/healthz", (_req, res) => res.send("ok"));
 app.use("/api/auth", authRouter);
 
 // Start server
-const PORT = Number(process.env.PORT || 3001);
+const PORT = Number(process.env.PORT || 3000);
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
