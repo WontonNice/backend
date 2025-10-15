@@ -15,7 +15,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",              // local dev frontend
-      "https://frontend-tgl3.onrender.com", // deployed frontend
+      //"https://frontend-tgl3.onrender.com", // Original Frontend
+      "https://frontend-0s8v.onrender.com", //Temp New Frontend for now
     ],
     // If you ever use cookies/auth headers across origins, turn this on:
     // credentials: true,
