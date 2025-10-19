@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import dns from "dns";
 import authRouter from "./routes/auth";
+import examLocksRouter from "./routes/ExamLock";
 
 dns.setDefaultResultOrder("ipv4first"); // prefer IPv4 to avoid ENETUNREACH
 
@@ -28,6 +29,7 @@ app.get("/healthz", (_req, res) => res.send("ok"));
 
 // Auth routes
 app.use("/api/auth", authRouter);
+app.use("/api/exams", examLocksRouter);
 
 // Start server
 const PORT = Number(process.env.PORT || 3000);
