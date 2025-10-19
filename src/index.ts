@@ -22,6 +22,7 @@ app.use(
 
 // Routes
 app.get("/health", (_req, res) => res.status(200).send("ok"));
+app.use(express.json());
 app.use("/api/auth", authRouter);
 
 // Pick port: prefer SERVER_PORT, then PORT, then 3001

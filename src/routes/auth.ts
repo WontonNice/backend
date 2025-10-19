@@ -40,15 +40,25 @@ router.post("/register", async (req, res) => {
       .select("id, username, role, created_at")
       .single();
 
-    if (error) {
-      // Handle unique constraint in a few common shapes
-      const msg = String(error.message || "");
-      if (error.code === "23505" || msg.includes("duplicate key") || msg.includes("already exists")) {
-        return res.status(409).json({ error: "Username already taken" });
-      }
-      console.error("REGISTER_ERROR:", error);
-      return res.status(500).json({ error: "Database error" });
-    }
+if (error) {
+  console.error("REGISTER_ERROR:", { code: error?.code, message: error?.message });
+  // Map common DB errors so the frontend sees a helpful message
+  const code = String(error?.code || "");
+  const msg  = String(error?.message || "");
+  if (code === "23505" || /duplicate key|already exists/i.test(msg)) {
+    return res.status(409).json({ error: "Username already taken" });
+  }
+  if (code === "42P01" || /relation .* does not exist/i.test(msg)) {
+    return res.status(500).json({ error: "Table public.users does not exist" });
+  }
+  if (code === "42703" || /column .* does not exist/i.test(msg)) {
+    return res.status(500).json({ error: "A referenced column does not exist (check column names)" });
+  }
+  if (code === "23502" || /null value in column .* violates not-null constraint/i.test(msg)) {
+    return res.status(400).json({ error: "Missing a required field (null in NOT NULL column)" });
+  }
+  return res.status(500).json({ error: "Database error" });
+}
 
     // Safety: coalesce role to 'student' in the response
     const user = { ...data, role: (data?.role === "teacher" ? "teacher" : "student") as "teacher" | "student" };
